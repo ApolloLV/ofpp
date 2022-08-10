@@ -272,4 +272,4 @@ YuyangL
 
 Josh Williams 
 
-Patrick Hohn
+Patrick Höhn
