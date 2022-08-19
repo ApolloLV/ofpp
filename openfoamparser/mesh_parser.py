@@ -8,7 +8,6 @@ import numpy as np
 import os
 import re
 import struct
-from sys import exit
 from collections import namedtuple
 from .field_parser import parse_internal_field, is_binary_format
 
@@ -25,8 +24,8 @@ def is_integer(s):
 
 class FoamMesh(object):
     """ FoamMesh class """
-    def __init__(self, path, region=''):
-        self.path = os.path.join(path, "constant", region,"polyMesh/")
+    def __init__(self, path, region=""):
+        self.path = os.path.join(path, "constant", region, "polyMesh/")
         self._parse_mesh_data(self.path)
         self.num_point = len(self.points)
         self.num_face = len(self.owner)

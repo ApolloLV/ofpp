@@ -1,6 +1,9 @@
 import unittest
-from OpenFOAMparser import lagrangian_parser as lp
 
+try:
+  from openfoamparser import lagrangian_parser as lp
+except:
+  from Ofpp import lagrangian_parser as lp
 
 class TestSum(unittest.TestCase):
   def test_lagrangian_parser(self):
