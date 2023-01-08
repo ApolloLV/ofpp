@@ -26,11 +26,12 @@ class FoamMesh(object):
     """ FoamMesh class """
     def __init__(self, path):
         self.path = os.path.join(path, "constant/polyMesh/")
+        self.__cell_neighbour_constructed=False
         self._parse_mesh_data(self.path)
         self.num_point = len(self.points)
         self.num_face = len(self.owner)
         self.num_inner_face = len(self.neighbour)
-        self.num_cell = max(self.owner)
+        self.num_cell = max(max(self.owner), max(self.neighbour)) + 1
         self._set_boundary_faces()
         self._construct_cells()
         self.cell_centres = None
@@ -69,6 +70,8 @@ class FoamMesh(object):
         :param i: cell index
         :return: neighbour cell list
         """
+        if self.__cell_neighbour_constructed is not True:
+            self._construct_cell_neighbour()
         return self.cell_neighbour[i]
 
     def is_cell_on_boundary(self, i, bd=None):
@@ -78,6 +81,8 @@ class FoamMesh(object):
         :param bd: boundary name, byte str
         :return: True or False
         """
+        if self.__cell_neighbour_constructed is not True:
+            self._construct_cell_neighbour()
         if i < 0 or i >= self.num_cell:
             return False
         if bd is not None:
@@ -130,25 +135,35 @@ class FoamMesh(object):
         set faces' boundary id which on boundary
         :return: none
         """
-        self.neighbour.extend([-10]*(self.num_face - self.num_inner_face))
+        self.neighbour.extend([-1]*(self.num_face - self.num_inner_face))
         for b in self.boundary.values():
             self.neighbour[b.start:b.start+b.num] = [b.id]*b.num
 
-    def _construct_cells(self):
+    def _construct_cells(self): # modified to make mapping order consistent with cell_neighbour
         """
-        construct cell faces, cell neighbours
+        construct cell faces
         :return: none
         """
-        cell_num = max(max(self.owner), max(self.neighbour)) + 1
-        self.cell_faces = [[] for i in range(cell_num)]
-        self.cell_neighbour = [[] for i in range(cell_num)]
-        for i, n in enumerate(self.owner):
-            self.cell_faces[n].append(i)
-        for i, n in enumerate(self.neighbour):
-            if n >= 0:
-                self.cell_faces[n].append(i)
-                self.cell_neighbour[n].append(self.owner[i])
-            self.cell_neighbour[self.owner[i]].append(n)
+        self.cell_faces = [[] for i in range(self.num_cell)]
+        for ifc, icl in enumerate(self.owner):
+            self.cell_faces[icl].append(ifc)
+        for ifc in range(self.num_inner_face):
+            self.cell_faces[self.neighbour[ifc]].append(ifc)
+
+    def _construct_cell_neighbour(self): # modified to make mapping order consistent with cell_neighbour
+        """
+        construct cell neighbours
+        :return: none
+        """
+        if self.__cell_neighbour_constructed is not True:
+            self.cell_neighbour = [[] for i in range(self.num_cell)]
+            for icl in range(self.num_cell):
+                for ifc in self.cell_faces[icl]:
+                    if (icl==self.owner[ifc]): # owner face
+                        self.cell_neighbour[icl].append(self.neighbour[ifc])
+                    else: # neighbour face
+                        self.cell_neighbour[icl].append(self.owner[ifc])
+            self.__cell_neighbour_constructed=True
 
     def _parse_mesh_data(self, path):
         """
@@ -305,7 +320,7 @@ class FoamMesh(object):
                 if in_patch_field:
                     if lc.strip() == b'}':
                         in_patch_field = False
-                        bd[current_patch] = Boundary(current_type, current_nFaces, current_start, -10-bid)
+                        bd[current_patch] = Boundary(current_type, current_nFaces, current_start, -1-bid)
                         bid += 1
                         current_patch = b''
                     elif b'nFaces' in lc:
