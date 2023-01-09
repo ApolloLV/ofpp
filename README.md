@@ -1,6 +1,16 @@
 # Openfoamparser
 This is a simple Python library for parsing result or mesh files in OpenFOAM output files to Numpy arrays. Both ascii and binary format are supported.
 
+-----
+
+SUN Smallwhite's changes:
+
+1. Bug Fix: wrong Cell Number
+
+2. Boundary Data Structure Update: make cell_faces and cell_neighbour consistent
+
+-----
+
 ## Installation
 
 Install with pip:
@@ -269,3 +279,6 @@ Jan Drees <jdrees at mail dot uni-paderborn dot de>
 Timothy-Edward-Kendon
 
 YuyangL
+
+SUN Smallwhite <niasw at pku dot edu dot cn>
+
