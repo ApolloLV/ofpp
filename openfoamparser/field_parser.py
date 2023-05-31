@@ -9,6 +9,13 @@ import os
 import struct
 import numpy as np
 
+def is_integer(val):
+  try:
+    int(val)
+  except:
+    return False
+  else:
+    return True
 
 def parse_field_all(fn):
     """
@@ -239,7 +246,7 @@ def write_field_data(data, fn):
     :param fn: path to field file
     :return: none
     """
-    points = parse_mesh_file_write(fn,
+    points = parse_field_file_write(fn,
                                       parse_write_points_content,
                                       data)
     return None
