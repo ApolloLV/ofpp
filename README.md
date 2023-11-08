@@ -3,13 +3,7 @@ This is a simple Python library for parsing result or mesh files in OpenFOAM out
 
 ## Installation
 
-Install with pip:
-
-```shell
-pip install openfoamparser
-```
-
-or install with setup.py by:
+Install with setup.py by:
 
 ```shell
 python setup.py install
